@@ -29,5 +29,8 @@
     "tsx": "4.20.5",
     "typescript": "5.9.2",
     "typescript-eslint": "8.40.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.17.4"
   }
 }
