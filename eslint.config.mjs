@@ -44,6 +44,7 @@ const NODE_GLOBALS = { ...globals.node };
 const JS_FILES = ['**/*.js', '**/*.cjs'];
 const MJS_FILES = ['**/*.mjs'];
 const TS_SRC_FILES = ['src/**/*.ts'];
+const LOGGER_FILE = ['src/runtime/logger.ts'];
 const TEST_AND_TOOL_FILES = [
   '**/*.test.ts',
   '**/*.spec.ts'
@@ -51,7 +52,7 @@ const TEST_AND_TOOL_FILES = [
 
 // Style / baseline rules applied across JS and TS (merged into TS blocks as well)
 const STYLE_RULES = {
-  'no-console': 'off',
+  'no-console': 'error',
   'no-duplicate-imports': 'error',
   'no-multi-assign': 'error',
   'no-param-reassign': 'error',
@@ -207,6 +208,14 @@ export default defineConfig([
       ...TS_SPECIFIC_RULES,
     },
   })),
+
+  // Allow console usage in the logger configuration file only (for rare cases like announcing path)
+  {
+    files: LOGGER_FILE,
+    rules: {
+      'no-console': 'off',
+    },
+  },
 
   // Tests/Tools: ergonomic defaults (console allowed, certain strict TS rules relaxed)
   {

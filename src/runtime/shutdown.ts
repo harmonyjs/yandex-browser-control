@@ -1,6 +1,8 @@
 // Graceful shutdown orchestration for MCP server over stdio
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { logger, flushLogs } from "./logger.js";
+const log = logger.child({ scope: "shutdown" });
 
 export type ShutdownOptions = {
   server: McpServer;
@@ -19,11 +21,11 @@ export function registerShutdown({ server, transport, forceExitMs = DEFAULT_FORC
     if (isShuttingDown) return;
     isShuttingDown = true;
 
-    // stderr only to avoid corrupting MCP stdout
-    console.error(`[mcp] received ${signal}, shutting down...`);
+    // stderr only (via pino destination policy) to avoid corrupting MCP stdout
+    log.warn({ signal }, "received signal, shutting down...");
 
     forceExitTimer = setTimeout(() => {
-      console.error(`[mcp] force-exiting after ${forceExitMs}ms`);
+  log.error({ forceExitMs }, "force-exiting after timeout");
       process.exit(1);
     }, forceExitMs);
     forceExitTimer.unref();
@@ -31,8 +33,9 @@ export function registerShutdown({ server, transport, forceExitMs = DEFAULT_FORC
     try {
       await server.close();
       await transport.close();
+      await flushLogs();
     } catch (err) {
-      console.error(`[mcp] error during shutdown:`, err);
+      log.error({ err }, "error during shutdown");
     } finally {
       if (forceExitTimer !== undefined) clearTimeout(forceExitTimer);
       process.exit(0);

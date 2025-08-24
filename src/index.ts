@@ -3,6 +3,8 @@
 
 import { server, transport } from "./mcp/server.js";
 import { registerShutdown } from "./runtime/shutdown.js";
+import { logger } from "./runtime/logger.js";
+const log = logger.child({ scope: "main" });
 
 async function main(): Promise<void> {
   // Register graceful shutdown and force-exit fallback
@@ -13,8 +15,8 @@ async function main(): Promise<void> {
   await server.connect(transport);
 }
 
-main().catch((err) => {
-  // Print errors to stderr; never to stdout.
-  console.error(err);
+main().catch((err: unknown) => {
+  // Log errors to stderr via pino; never to stdout.
+  log.error({ err }, "fatal error in main");
   process.exit(1);
 });

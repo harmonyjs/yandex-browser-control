@@ -14,6 +14,17 @@ Check out settings to customize the extension behavior.
 
 Once installed, you can control Yandex Browser directly through Claude Desktop. 
 
+### Logging
+
+- All logs are emitted to stderr only (never stdout) to comply with MCP over stdio.
+- In addition, logs are duplicated to a temp file. The absolute path to this file is printed to stderr on startup, for example:
+
+```
+[mcp] logging to file: /var/folders/…/yandex-browser-control.log.12345
+```
+
+You can control verbosity with the `LOG_LEVEL` env variable (default: `info`).
+
 ### Contributing
 
 If you want to contribute to the development of this extension, here’s how to get started.
