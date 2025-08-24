@@ -2,13 +2,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { logger } from "../runtime/logger.js";
+import { packageMeta as pkg } from "../runtime/package-meta.js";
+
 const log = logger.child({ scope: "server" });
 
 export const server = new McpServer({
-  name: "yandex-browser-control",
-  version: "0.0.1",
+  name: pkg.name,
+  version: pkg.version,
 });
 
-log.debug({ name: "yandex-browser-control", version: "0.0.1" }, "MCP server initialized");
+log.debug({ name: pkg.name, version: pkg.version }, "MCP server initialized");
 
 export const transport = new StdioServerTransport();
