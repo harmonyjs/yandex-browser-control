@@ -14,7 +14,7 @@ const printToStderr = (line: string): void => {
 
 // Build log file path inside the OS temp directory
 const LOG_FILE_BASENAME = 'yandex-browser-control.log';
-const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+const timestamp = Date.now();
 export const logFilePath = join(tmpdir(), `${LOG_FILE_BASENAME}.${process.pid}.${timestamp}`);
 
 // Create destinations: async file and stderr
@@ -31,10 +31,13 @@ export const logger = pino(options, multistream([
 ]));
 
 // Announce the log file path to stderr so users know where to find logs
-printToStderr(`[mcp] logging to file: ${logFilePath}`);
+printToStderr(`logging to file: ${logFilePath}`);
 
-// Optional: emit a structured log that logger is ready (goes to stderr and file)
-logger.info({ logFilePath }, 'logger initialized');
+// Helpful hint: pretty-print the JSON logs locally (stderr tip only; stdout is reserved for MCP)
+printToStderr(`you can pretty print logs via 'npx -y pino-pretty@12.1.0 < ${logFilePath}'`);
+
+// emit a structured log that logger is ready (goes to stderr and file)
+logger.info('logger initialized');
 
 // Utility to flush logs on shutdown when desired
 export const flushLogs = async (): Promise<void> => {
