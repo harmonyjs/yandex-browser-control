@@ -13,14 +13,21 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc -p tsconfig.json",
+    "lint": "eslint --fix .",
     "start": "node dist/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "author": "Andrey Vavilov <a@vavilov.dev>",
   "license": "MIT",
   "devDependencies": {
+    "@eslint/js": "9.34.0",
     "@types/node": "24.3.0",
+    "eslint": "9.34.0",
+    "eslint-plugin-n": "17.21.3",
+    "eslint-plugin-unicorn": "60.0.0",
+    "globals": "16.3.0",
     "tsx": "4.20.5",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "typescript-eslint": "8.40.0"
   }
 }

@@ -1,4 +1,5 @@
-async function main() {
+async function main(): Promise<void> {
+    await Promise.resolve();
     console.error('Server started');
     // Quit the application
     process.exit(0);

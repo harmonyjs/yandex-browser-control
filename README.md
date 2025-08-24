@@ -32,7 +32,23 @@ This command runs the TypeScript source directly using `tsx`.
 npm run dev
 ```
 
-**3. Build for Production**
+**3. Code Quality**
+
+Lint and automatically fix code style issues:
+
+```sh
+npm run lint
+```
+
+**4. Type-Check**
+
+Run the TypeScript compiler to check for type errors without generating output files.
+
+```sh
+npm run typecheck
+```
+
+**5. Build for Production**
 
 This command compiles the TypeScript code to JavaScript in the `dist` directory.
 
@@ -40,18 +56,10 @@ This command compiles the TypeScript code to JavaScript in the `dist` directory.
 npm run build
 ```
 
-**4. Run the Built Output**
+**6. Run the Built Output**
 
 ```sh
 npm start
-```
-
-**5. Type-Check**
-
-Run the TypeScript compiler to check for type errors without generating output files.
-
-```sh
-npm run typecheck
 ```
 
 ### Project Structure
