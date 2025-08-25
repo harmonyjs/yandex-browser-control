@@ -4,7 +4,13 @@ An MCP server for controlling Yandex Browser. You can connect it to Claude Deskt
 
 ### Installation
 
-You can use this project in two ways:
+To use as an npm package:
+
+```bash
+npm install @avavilov/yandex-browser-control
+```
+
+Or use as a Claude Desktop MCP server:
 
 - If distributed via the Claude Desktop Extensions catalog: open Claude Desktop → Extensions and install "Yandex Browser Control" (when available).
 - For local development today: add it as a custom MCP server in Claude Desktop.

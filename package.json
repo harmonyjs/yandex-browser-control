@@ -1,5 +1,5 @@
 {
-  "name": "yandex-browser-control",
+  "name": "@avavilov/yandex-browser-control",
   "description": "Control Yandex browser tabs, windows, and navigation",
   "keywords": [
     "yandex",
@@ -8,7 +8,8 @@
     "mcp"
   ],
   "version": "0.0.1",
-  "main": "src/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "dev": "tsx src/index.ts",
@@ -20,10 +21,34 @@
     "version:up": "node ./scripts/version-up.mjs minor",
     "version:patch": "node ./scripts/version-up.mjs patch",
     "version:minor": "node ./scripts/version-up.mjs minor",
-    "version:major": "node ./scripts/version-up.mjs major"
+    "version:major": "node ./scripts/version-up.mjs major",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm run build",
+    "prepare": "npm run build",
+    "preversion": "npm run lint && npm run typecheck",
+    "postversion": "git push && git push --tags",
+    "release:patch": "npm version patch && npm publish --access public",
+    "release:minor": "npm version minor && npm publish --access public",
+    "release:major": "npm version major && npm publish --access public"
   },
   "author": "Andrey Vavilov <a@vavilov.dev>",
   "license": "MIT",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "package.json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harmonyjs/yandex-browser-control.git"
+  },
+  "bugs": {
+    "url": "https://github.com/harmonyjs/yandex-browser-control/issues"
+  },
+  "homepage": "https://github.com/harmonyjs/yandex-browser-control#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@eslint/js": "9.34.0",
     "@types/node": "24.3.0",
