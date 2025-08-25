@@ -16,6 +16,16 @@ This command runs the TypeScript source directly using `tsx`.
 npm run dev
 ```
 
+## Debug the server
+
+To debug the MCP server with the Inspector, run:
+
+```sh
+npx @modelcontextprotocol/inspector -- tsx src/index.ts
+```
+
+This command starts the inspector and launches the server entry at `src/index.ts`.
+
 **3. Code Quality**
 
 Lint and automatically fix code style issues:
