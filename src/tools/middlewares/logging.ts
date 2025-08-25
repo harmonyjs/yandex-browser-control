@@ -6,7 +6,11 @@ import { logger } from "../../runtime/logger.js";
  * Wrap a handler with timing and final info logging.
  * Note: kept to 3 parameters to satisfy max-params rule.
  */
-export async function runWithLogging<T>(name: string, extra: ToolExtra, run: () => Promise<T>): Promise<T> {
+export async function runWithLogging<T>(
+  name: string,
+  extra: ToolExtra,
+  run: () => Promise<T>,
+): Promise<T> {
   const start = Date.now();
   const { requestId } = extra;
   try {
@@ -21,5 +25,7 @@ export async function runWithLogging<T>(name: string, extra: ToolExtra, run: () 
  * Curried wrapper form for middleware chaining.
  */
 export function withLogging<T>(name: string, extra: ToolExtra): Wrapper<T> {
-  return (next: Runner<T>): Runner<T> => async (): Promise<T> => runWithLogging(name, extra, next);
+  return (next: Runner<T>): Runner<T> =>
+    async (): Promise<T> =>
+      runWithLogging(name, extra, next);
 }

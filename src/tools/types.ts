@@ -1,4 +1,9 @@
-import type { CallToolResult, ToolAnnotations, ServerNotification, ServerRequest } from "@modelcontextprotocol/sdk/types.js";
+import type {
+  CallToolResult,
+  ToolAnnotations,
+  ServerNotification,
+  ServerRequest,
+} from "@modelcontextprotocol/sdk/types.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
 // Minimal, unified contract for tool modules without tight type coupling.
@@ -56,4 +61,6 @@ export type ToolModuleNoArgs = ToolModuleBase & {
 /**
  * Union of tool module variants. Presence of inputSchema discriminates the handler signature.
  */
-export type ToolModule<Args = unknown> = ToolModuleNoArgs | ToolModuleWithArgs<Args>;
+export type ToolModule<Args = unknown> =
+  | ToolModuleNoArgs
+  | ToolModuleWithArgs<Args>;

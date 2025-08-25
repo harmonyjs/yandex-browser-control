@@ -36,7 +36,7 @@ export function registerTools(server: McpServer): void {
     failed: failed.length,
     failedTools: failed.map((f) => f.name),
   };
-  
+
   log.info(summary, "tools registration summary");
 
   if (registered > 0) {

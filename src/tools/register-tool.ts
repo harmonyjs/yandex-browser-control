@@ -26,38 +26,63 @@ import { withLogging } from "./middlewares/logging.js";
 /**
  * Single entry point to execute a handler through the wrapper pipeline.
  */
-function runThrough<T>(name: string, extra: ToolExtra, leaf: Runner<T>): Promise<T> {
+function runThrough<T>(
+  name: string,
+  extra: ToolExtra,
+  leaf: Runner<T>,
+): Promise<T> {
   const runner = chain<T>(
     // Order matters: topmost wraps below ones
     withLogging<T>(name, extra),
-    withAbort<T>(name, extra)
+    withAbort<T>(name, extra),
   )(leaf);
   return runner();
 }
 
 // Registers a ToolModule on the given server with the correct callback signature.
 // Centralizes the minimal necessary casting to keep tool modules clean.
-export function registerToolModule<I = unknown>(server: McpServer, mod: ToolModule<I>): void {
+export function registerToolModule<I = unknown>(
+  server: McpServer,
+  mod: ToolModule<I>,
+): void {
   if (mod.inputSchema !== undefined) {
     const cb = wrapWithArgs(mod.name, mod.handler);
     // About the cast: The SDK bundles its own `zod`, so ZodRawShape is nominally different.
     // We keep tools decoupled and cast only at this boundary. Runtime validation remains in SDK.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-    (server.registerTool as any)(mod.name, { description: mod.description, inputSchema: mod.inputSchema, annotations: mod.annotations }, cb);
+    (server.registerTool as any)(
+      mod.name,
+      {
+        description: mod.description,
+        inputSchema: mod.inputSchema,
+        annotations: mod.annotations,
+      },
+      cb,
+    );
   } else {
     const cb = wrapNoArgs(mod.name, mod.handler);
     // See note above re: single boundary cast due to Zod instance mismatch.
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-    (server.registerTool as any)(mod.name, { description: mod.description, annotations: mod.annotations }, cb);
+    (server.registerTool as any)(
+      mod.name,
+      { description: mod.description, annotations: mod.annotations },
+      cb,
+    );
   }
 }
 
-function wrapWithArgs<I>(name: string, fn: (args: I, extra: ToolExtra) => Promise<CallToolResult>): (args: I, extra: ToolExtra) => Promise<CallToolResult> {
+function wrapWithArgs<I>(
+  name: string,
+  fn: (args: I, extra: ToolExtra) => Promise<CallToolResult>,
+): (args: I, extra: ToolExtra) => Promise<CallToolResult> {
   return async (args: I, extra: ToolExtra): Promise<CallToolResult> =>
     runThrough<CallToolResult>(name, extra, () => fn(args, extra));
 }
 
-function wrapNoArgs(name: string, fn: (extra: ToolExtra) => Promise<CallToolResult>): (extra: ToolExtra) => Promise<CallToolResult> {
+function wrapNoArgs(
+  name: string,
+  fn: (extra: ToolExtra) => Promise<CallToolResult>,
+): (extra: ToolExtra) => Promise<CallToolResult> {
   return async (extra: ToolExtra): Promise<CallToolResult> =>
     runThrough<CallToolResult>(name, extra, () => fn(extra));
 }

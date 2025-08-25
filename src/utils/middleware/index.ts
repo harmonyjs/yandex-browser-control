@@ -13,6 +13,9 @@ export type Wrapper<T> = (next: Runner<T>) => Runner<T>;
 /**
  * Compose wrappers from right to left and apply them to a leaf runner.
  */
-export function chain<T>(...wrappers: Wrapper<T>[]): (leaf: Runner<T>) => Runner<T> {
-  return (leaf: Runner<T>): Runner<T> => wrappers.reduceRight((acc, w) => w(acc), leaf);
+export function chain<T>(
+  ...wrappers: Wrapper<T>[]
+): (leaf: Runner<T>) => Runner<T> {
+  return (leaf: Runner<T>): Runner<T> =>
+    wrappers.reduceRight((acc, w) => w(acc), leaf);
 }

@@ -3,7 +3,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 // Tool metadata
 export const name = "count_windows_and_tabs" as const;
-export const description =  `
+export const description = `
     Count total number of open windows and tabs in the browser
 ` as const;
 
@@ -27,5 +27,5 @@ export async function handler(_: ToolExtra): Promise<CallToolResult> {
 export const module: ToolModule = {
   name,
   description,
-  handler
+  handler,
 };

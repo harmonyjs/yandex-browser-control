@@ -13,7 +13,11 @@ export type ShutdownOptions = {
 const DEFAULT_FORCE_EXIT_MS = 10_000;
 
 // Side effects: registers process signal listeners; logs only to stderr.
-export function registerShutdown({ server, transport, forceExitMs = DEFAULT_FORCE_EXIT_MS }: ShutdownOptions): () => void {
+export function registerShutdown({
+  server,
+  transport,
+  forceExitMs = DEFAULT_FORCE_EXIT_MS,
+}: ShutdownOptions): () => void {
   let isShuttingDown = false;
   let forceExitTimer: NodeJS.Timeout | undefined;
 
@@ -25,7 +29,7 @@ export function registerShutdown({ server, transport, forceExitMs = DEFAULT_FORC
     log.warn({ signal }, "received signal, shutting down...");
 
     forceExitTimer = setTimeout(() => {
-  log.error({ forceExitMs }, "force-exiting after timeout");
+      log.error({ forceExitMs }, "force-exiting after timeout");
       process.exit(1);
     }, forceExitMs);
     forceExitTimer.unref();
@@ -42,8 +46,12 @@ export function registerShutdown({ server, transport, forceExitMs = DEFAULT_FORC
     }
   };
 
-  const onSigint = (): void => { void shutdown("SIGINT"); };
-  const onSigterm = (): void => { void shutdown("SIGTERM"); };
+  const onSigint = (): void => {
+    void shutdown("SIGINT");
+  };
+  const onSigterm = (): void => {
+    void shutdown("SIGTERM");
+  };
 
   process.on("SIGINT", onSigint);
   process.on("SIGTERM", onSigterm);

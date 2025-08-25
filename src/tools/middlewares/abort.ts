@@ -7,7 +7,11 @@ import { createAbortError } from "../../utils/errors.js";
  * Wrap a handler with abort wiring. Logs a warning on abort and ensures
  * the event listener is removed. Throws AbortError if already aborted.
  */
-export async function runWithAbort<T>(name: string, extra: ToolExtra, run: () => Promise<T>): Promise<T> {
+export async function runWithAbort<T>(
+  name: string,
+  extra: ToolExtra,
+  run: () => Promise<T>,
+): Promise<T> {
   const { signal, requestId } = extra;
 
   const onAbort = (): void => {
@@ -31,5 +35,7 @@ export async function runWithAbort<T>(name: string, extra: ToolExtra, run: () =>
  * Curried wrapper form for middleware chaining.
  */
 export function withAbort<T>(name: string, extra: ToolExtra): Wrapper<T> {
-  return (next: Runner<T>): Runner<T> => async (): Promise<T> => runWithAbort(name, extra, next);
+  return (next: Runner<T>): Runner<T> =>
+    async (): Promise<T> =>
+      runWithAbort(name, extra, next);
 }
