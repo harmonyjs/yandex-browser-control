@@ -36,7 +36,7 @@ You can control verbosity with the `LOG_LEVEL` env variable (default: `info`).
 
 ### Contributing
 
-See [contributing.md](./contributing.md) for development, build, and code quality instructions.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development, build, and code quality instructions.
 
 ### Project Structure
 
