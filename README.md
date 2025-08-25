@@ -77,6 +77,16 @@ npm start
 
 -   `src/` — TypeScript source code for the extension.
 -   `dist/` — Compiled JavaScript output (generated on build).
+-   `src/tools/` — MCP tools, one directory per tool with an `index.ts` that exports metadata, input schema (when needed), handler, and types.
+
+### Tools
+
+- Each tool lives in `src/tools/<tool-name>/index.ts` and should export:
+  - `name` and `description` strings
+  - `inputSchema` (Zod raw shape) when the tool takes parameters; omit `inputSchema` entirely for no-arg tools
+  - `handler` function returning `{ content: [{ type: 'text', text: string }] }` or structured content
+  - any `types` (e.g., `Input`, `Output`)
+- Register all tools in `src/tools/index.ts` via `registerTools(server)`, which is invoked from `src/index.ts`.
 
 ### License
 
