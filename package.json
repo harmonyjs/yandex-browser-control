@@ -15,7 +15,12 @@
     "build": "tsc -p tsconfig.json",
     "lint": "eslint --fix .",
     "start": "node dist/index.js",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pack": "node ./scripts/pack.mjs",
+    "version:up": "node ./scripts/version-up.mjs minor",
+    "version:patch": "node ./scripts/version-up.mjs patch",
+    "version:minor": "node ./scripts/version-up.mjs minor",
+    "version:major": "node ./scripts/version-up.mjs major"
   },
   "author": "Andrey Vavilov <a@vavilov.dev>",
   "license": "MIT",

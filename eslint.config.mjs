@@ -52,7 +52,6 @@ const TEST_AND_TOOL_FILES = [
 
 // Style / baseline rules applied across JS and TS (merged into TS blocks as well)
 const STYLE_RULES = {
-  'no-console': 'error',
   'no-duplicate-imports': 'error',
   'no-multi-assign': 'error',
   'no-param-reassign': 'error',
@@ -74,6 +73,7 @@ const STYLE_RULES = {
 
 // TypeScript-specific rules (merged atop preset configs for typed linting)
 const TS_SPECIFIC_RULES = {
+  'no-console': 'error',
   complexity: ['error', 10],
   '@typescript-eslint/no-unused-vars': [
     'error',
