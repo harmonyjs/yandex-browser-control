@@ -1,0 +1,38 @@
+{
+  "dxt_version": "0.1",
+  "name": "yandex-browser-control",
+  "version": "0.0.1",
+  "description": "Control Yandex browser tabs, windows, and navigation",
+  "author": {
+    "name": "Andrey Vavilov",
+    "email": "a@vavilov.dev"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/index.js"
+      ]
+    }
+  },
+  "tools": [
+    {
+      "name": "count_windows_and_tabs",
+      "description": "Count total number of open windows and tabs in the browser"
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "yandex",
+    "browser",
+    "automation",
+    "mcp"
+  ],
+  "compatibility": {
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}
