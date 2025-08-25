@@ -1,18 +1,21 @@
 # Yandex Browser Control
 
-A Claude Desktop extension for controlling Yandex Browser. This extension allows you to manage tabs, windows, and navigation directly from the desktop agent.
+An MCP server for controlling Yandex Browser. You can connect it to Claude Desktop (or any MCP-capable host) to manage tabs, windows, and navigation.
 
 ### Installation
 
-Open Claude Desktop, go to the Extensions tab, and search for "Yandex Browser Control". Click "Install" to add the extension.
+You can use this project in two ways:
 
-Restart Claude Desktop to activate the extension if necessary.
-
-Check out settings to customize the extension behavior.
+- If distributed via the Claude Desktop Extensions catalog: open Claude Desktop → Extensions and install "Yandex Browser Control" (when available).
+- For local development today: add it as a custom MCP server in Claude Desktop.
+	- Build or run from source (see Development below).
+	- In Claude Desktop, go to Settings → Extensions → Model Context Protocol → Add server (Command), and point it to either:
+		- Dev: run command `npm run dev` in this repository directory
+		- Prod: run command `node dist/index.js` in this repository directory
 
 ### Usage
 
-Once installed, you can control Yandex Browser directly through Claude Desktop. 
+Once connected, you can control Yandex Browser directly through Claude Desktop.
 
 ### Logging
 
@@ -20,7 +23,7 @@ Once installed, you can control Yandex Browser directly through Claude Desktop.
 - In addition, logs are duplicated to a temp file. The absolute path to this file is printed to stderr on startup, for example:
 
 ```
-[mcp] logging to file: /var/folders/…/yandex-browser-control.log.12345
+logging to file: /var/folders/…/yandex-browser-control.log.12345
 ```
 
 You can control verbosity with the `LOG_LEVEL` env variable (default: `info`).
@@ -75,7 +78,7 @@ npm start
 
 ### Project Structure
 
--   `src/` — TypeScript source code for the extension.
+-   `src/` — TypeScript source code for the server.
 -   `dist/` — Compiled JavaScript output (generated on build).
 -   `src/tools/` — MCP tools, one directory per tool with an `index.ts` that exports metadata, input schema (when needed), handler, and types.
 
