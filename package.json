@@ -58,12 +58,12 @@
     "globals": "16.3.0",
     "tsx": "4.20.5",
     "typescript": "5.9.2",
-    "typescript-eslint": "8.40.0"
+    "typescript-eslint": "8.41.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.17.4",
     "@avavilov/apple-script": "0.0.2",
-    "pino": "9.3.2",
-    "zod": "3.23.8"
+    "pino": "9.9.0",
+    "zod": "4.1.5"
   }
 }
