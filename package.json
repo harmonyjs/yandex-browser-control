@@ -62,7 +62,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.17.4",
-    "@avavilov/apple-script": "0.0.2",
+    "@avavilov/apple-script": "0.0.3",
     "pino": "9.9.0",
     "zod": "4.1.5"
   }

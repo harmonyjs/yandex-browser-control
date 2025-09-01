@@ -1,8 +1,3 @@
-/*
-  eslint-disable @typescript-eslint/no-unsafe-assignment,
-                 @typescript-eslint/no-unsafe-call,
-                 @typescript-eslint/no-unsafe-member-access
-*/
 import type { ToolExtra, ToolModule } from "../types.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
