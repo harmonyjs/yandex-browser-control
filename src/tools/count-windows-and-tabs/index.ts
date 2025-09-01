@@ -1,7 +1,7 @@
 import type { ToolExtra, ToolModule } from "../types.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { createAppleRunner, operation } from "@avavilov/apple-script";
+import { createAppleRunner, operation, isSuccess, getUserFriendlyMessage } from "@avavilov/apple-script";
 import { logger } from "../../runtime/logger.js";
 
 // Tool metadata
@@ -62,8 +62,8 @@ const log = logger.child({ tool: name });
 export async function handler(_extra: ToolExtra): Promise<CallToolResult> {
   const result = await apple.run(countOpenTabs, {});
 
-  if (!result.ok) {
-    const { message } = result.error;
+  if (!isSuccess(result)) {
+    const message = getUserFriendlyMessage(result.error);
     log.error({ err: result.error }, "countOpenTabs failed");
     return {
       isError: true,
