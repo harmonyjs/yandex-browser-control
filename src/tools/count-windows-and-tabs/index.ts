@@ -57,17 +57,12 @@ const apple = createAppleRunner({
 
 const log = logger.child({ tool: name });
 
-// Narrowed result type to keep ESLint satisfied
-type RunOk<T> = { ok: true; data: T };
-type RunErr = { ok: false; error: { message: string } };
-type RunResult<T> = RunOk<T> | RunErr;
-
 // Handler implementation
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function handler(_extra: ToolExtra): Promise<CallToolResult> {
-  const result = (await apple.run(countOpenTabs, {})) as unknown as RunResult<number>;
+  const result = await apple.run(countOpenTabs, {});
 
-  if (result.ok === false) {
+  if (!result.ok) {
     const { message } = result.error;
     log.error({ err: result.error }, "countOpenTabs failed");
     return {
