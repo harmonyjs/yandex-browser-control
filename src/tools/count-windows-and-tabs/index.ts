@@ -1,8 +1,9 @@
-import type { ToolExtra, ToolModule } from "../types.js";
+import type { ToolModule } from "../types.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { createAppleRunner, operation, isSuccess, getUserFriendlyMessage } from "@avavilov/apple-script";
+import { operation, isSuccess, getUserFriendlyMessage } from "@avavilov/apple-script";
 import { logger } from "../../runtime/logger.js";
+import { apple } from "../../runtime/apple-runner.js";
 
 // Tool metadata
 export const name = "count_windows_and_tabs" as const;
@@ -10,8 +11,7 @@ export const description = `
     Count total number of open windows and tabs in Yandex Browser on macOS
 ` as const;
 
-// No inputs for now
-export type Input = Record<string, never>;
+const log = logger.child({ tool: name });
 
 // AppleScript operation: count all tabs across all windows
 const countOpenTabs = operation.scalar({
@@ -46,20 +46,7 @@ const countOpenTabs = operation.scalar({
   `,
 });
 
-// Create a runner for Yandex Browser
-const APP_ID = "ru.yandex.desktop.yandex-browser" as const;
-const apple = createAppleRunner({
-  appId: APP_ID,
-  // Keep conservative defaults; library has its own sensible defaults too
-  ensureAppReady: true,
-  validateByDefault: true,
-});
-
-const log = logger.child({ tool: name });
-
-// Handler implementation
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function handler(_extra: ToolExtra): Promise<CallToolResult> {
+export async function handler(): Promise<CallToolResult> {
   const result = await apple.run(countOpenTabs, {});
 
   if (!isSuccess(result)) {
