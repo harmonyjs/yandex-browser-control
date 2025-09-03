@@ -16,6 +16,12 @@ This command runs the TypeScript source directly using `tsx`.
 npm run dev
 ```
 
+### Creating a new tool
+
+For a step-by-step guide on adding a new MCP tool (structure, registration, Zod input schemas, AppleScript patterns, and verification), see:
+
+- docs/how-to-create-a-new-tool.md
+
 ## Debug the server
 
 To debug the MCP server with the Inspector, run:
