@@ -126,18 +126,26 @@ function main() {
   if (existsSync(join(root, 'package-lock.json'))) {
     cpSync(join(root, 'package-lock.json'), join(tmpDir, 'package-lock.json'));
   }
+  // Copy npm config if present to ensure correct registry/auth inside temp dir
+  if (existsSync(join(root, '.npmrc'))) {
+    log({ level: 'info', event: 'tmp.copy.npmrc', msg: 'Copy .npmrc' });
+    cpSync(join(root, '.npmrc'), join(tmpDir, '.npmrc'));
+  } else {
+    log({ level: 'debug', event: 'tmp.copy.npmrc.skip', msg: 'No .npmrc found in project root' });
+  }
   // Copy built files
   log({ level: 'info', event: 'tmp.copy.dist', msg: 'Copy dist/ directory' });
   ensureDir(join(tmpDir, 'dist'));
   cpSync(join(root, 'dist'), join(tmpDir, 'dist'), { recursive: true });
 
   // 3) Install prod-only deps inside the temp dir
-  log({ level: 'info', event: 'deps.install', msg: 'Installing production-only dependencies' });
+  log({ level: 'info', event: 'deps.install', msg: 'Installing production-only dependencies (scripts ignored)' });
   if (existsSync(join(tmpDir, 'package-lock.json'))) {
-    run('npm', ['ci', '--omit=dev'], { cwd: tmpDir });
+    // --ignore-scripts avoids running lifecycle hooks like prepare that may expect source files (e.g., tsconfig.json)
+    run('npm', ['ci', '--omit=dev', '--ignore-scripts'], { cwd: tmpDir });
   } else {
     // Fall back if no lockfile exists
-    run('npm', ['i', '--omit=dev', '--no-package-lock'], { cwd: tmpDir });
+    run('npm', ['i', '--omit=dev', '--no-package-lock', '--ignore-scripts'], { cwd: tmpDir });
   }
 
   // 4) Pack directly to artifacts directory
