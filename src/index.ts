@@ -4,10 +4,19 @@
 import { server, transport } from "./mcp/server.js";
 import { registerTools } from "./tools/index.js";
 import { registerShutdown } from "./runtime/shutdown.js";
-import { logger } from "./runtime/logger.js";
+import { logger } from "./logger/index.js";
+import { getEnvReports } from "./env/index.js";
 const log = logger.child({ scope: "main" });
 
 async function main(): Promise<void> {
+  // Log effective environment configuration for visibility
+  try {
+    const envReports = getEnvReports();
+    logger.info({ envReports }, "environment resolved");
+  } catch {
+    // avoid throwing during early startup if env module is unavailable
+  }
+
   // Register graceful shutdown and force-exit fallback
   registerShutdown({ server, transport });
 

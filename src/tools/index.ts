@@ -1,7 +1,7 @@
 // Tools aggregator and registrar
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ToolModule } from "./types.js";
-import { logger } from "../runtime/logger.js";
+import { logger } from "../logger/index.js";
 import { registerToolModule } from "./register-tool.js";
 
 // Import individual tools' register functions and metadata

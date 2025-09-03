@@ -1,7 +1,7 @@
 // Graceful shutdown orchestration for MCP server over stdio
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { logger, flushLogs } from "./logger.js";
+import { logger, flushLogs } from "../logger/index.js";
 const log = logger.child({ scope: "shutdown" });
 
 export type ShutdownOptions = {

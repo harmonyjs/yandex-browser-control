@@ -2,6 +2,8 @@
 
 An MCP server for controlling Yandex Browser. You can connect it to Claude Desktop (or any MCP-capable host) to manage tabs, windows, and navigation.
 
+Note: macOS only. This extension relies on AppleScript and the Yandex Browser AppleScript dictionary, which are available on macOS.
+
 ### Installation
 
 To use as an npm package:
@@ -22,6 +24,22 @@ Or use as a Claude Desktop MCP server:
 ### Usage
 
 Once connected, you can control Yandex Browser directly through Claude Desktop.
+
+### Configuration
+
+You can choose which macOS app bundle to control using a setting exposed in Claude Desktop:
+
+- Setting name: app_id
+- Default: `ru.yandex.desktop.yandex-browser`
+- Where it’s used: passed to the server as environment variable `APP_ID`.
+
+This is useful if you want to target Yandex Browser Beta/Canary or a custom Chromium-based browser that supports the same AppleScript dictionary. Set the bundle identifier accordingly (for example, `ru.yandex.desktop.yandex-browser.beta` if applicable).
+
+For local development or manual runs, you can also set the environment variable directly:
+
+```
+APP_ID="ru.yandex.desktop.yandex-browser" npm run dev
+```
 
 ### Logging
 

@@ -14,7 +14,10 @@
       "command": "node",
       "args": [
         "${__dirname}/dist/index.js"
-      ]
+      ],
+      "env": {
+        "APP_ID": "${user_config.app_id}"
+      }
     }
   },
   "tools": [
@@ -31,8 +34,20 @@
     "mcp"
   ],
   "compatibility": {
+    "platforms": [
+      "darwin"
+    ],
     "runtimes": {
       "node": ">=18.0.0"
+    }
+  },
+  "user_config": {
+    "app_id": {
+      "type": "string",
+      "title": "Application bundle identifier",
+      "description": "macOS bundle identifier of the browser app to control. Use the default for stable Yandex Browser, or change to Beta/Canary if needed.",
+      "default": "ru.yandex.desktop.yandex-browser",
+      "required": false
     }
   }
 }

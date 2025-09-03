@@ -1,7 +1,7 @@
 // MCP runtime singletons: server and stdio transport
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { logger } from "../runtime/logger.js";
+import { logger } from "../logger/index.js";
 import { packageMeta as pkg } from "../runtime/package-meta.js";
 
 const log = logger.child({ scope: "server" });

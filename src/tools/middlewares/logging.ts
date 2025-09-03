@@ -1,6 +1,6 @@
 import type { Runner, Wrapper } from "../../utils/middleware/index.js";
 import type { ToolExtra } from "../types.js";
-import { logger } from "../../runtime/logger.js";
+import { logger } from "../../logger/index.js";
 
 /**
  * Wrap a handler with timing and final info logging.

@@ -2,7 +2,7 @@ import type { ToolModule } from "../types.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { operation, isSuccess, getUserFriendlyMessage } from "@avavilov/apple-script";
-import { logger } from "../../runtime/logger.js";
+import { logger } from "../../logger/index.js";
 import { apple } from "../../runtime/apple-runner.js";
 
 // Tool metadata
