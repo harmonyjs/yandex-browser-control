@@ -29,7 +29,8 @@ ruleset:
         # Tags: thinking-tool, reasoning, analysis, copilot
         - title: Thinking Tool
           must:
-            - Invoke the Thinking Tool on every new user request to analyze the task and draft a solution.
+            - Invoke the Think Tool on every new user request to analyze the task and draft a solution.
+            - Use the Think Tool as many times as possible to refine the approach before coding.
 
         # Rationale: Automatic resolution of routine errors accelerates development and reduces overhead.
         # Tags: autonomy, lint, typecheck, tests, maintenance
