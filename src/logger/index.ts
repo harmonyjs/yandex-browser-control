@@ -3,15 +3,10 @@
 // - Additionally, logs are duplicated into a temp file
 // - On init, the absolute path to the temp log file is printed to stderr
 
-import {
-  pino,
-  multistream,
-  destination,
-  type LoggerOptions,
-  type DestinationStream,
-} from "pino";
+import { pino, multistream, destination, type LoggerOptions, type DestinationStream } from "pino";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { LOG_LEVEL } from "../env/index.js";
 
 // Small helper to write a single line to stderr (never stdout)
 const printToStderr = (line: string): void => {
@@ -35,7 +30,7 @@ const fileDestination: DestinationStream = destination({
 
 // Pino configuration: log to our multistream, level defaults to info
 const options: LoggerOptions = {
-  level: process.env.LOG_LEVEL ?? "info",
+  level: LOG_LEVEL,
 };
 
 export const logger = pino(
@@ -53,6 +48,8 @@ printToStderr(
 
 // emit a structured log that logger is ready (goes to stderr and file)
 logger.info("logger initialized");
+
+// env reports are logged from src/index.ts to keep side-effects in the entry point
 
 // Utility to flush logs on shutdown when desired
 export const flushLogs = async (): Promise<void> => {
@@ -72,3 +69,6 @@ export const flushLogs = async (): Promise<void> => {
   }
   await Promise.resolve();
 };
+
+// Public re-exports for a single entry point API
+export * from "./constants.js";

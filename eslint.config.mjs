@@ -44,7 +44,7 @@ const NODE_GLOBALS = { ...globals.node };
 const JS_FILES = ['**/*.js', '**/*.cjs'];
 const MJS_FILES = ['**/*.mjs'];
 const TS_SRC_FILES = ['src/**/*.ts'];
-const LOGGER_FILE = ['src/runtime/logger.ts'];
+const LOGGER_FILE = ['src/logger/index.ts'];
 const TEST_AND_TOOL_FILES = [
   '**/*.test.ts',
   '**/*.spec.ts'
