@@ -1,5 +1,5 @@
 import { createAppleRunner } from "@avavilov/apple-script";
-import { logger } from "./logger.js";
+import { logger } from "../logger/index.js";
 import { APP_ID } from "../env/index.js";
 
 // Yandex Browser bundle identifier (configurable via env; see src/env/index.ts)
