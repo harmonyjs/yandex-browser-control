@@ -7,6 +7,9 @@ Operations are intentionally **atomic, predictable, and stable**. They expose ra
 ## What lives here
 
 - One file per operation (for example, `get-tabs.ts`).
+  - Current operations include:
+    - `get-tabs.ts` — snapshot of tabs across all windows
+    - `get-windows.ts` — snapshot of all windows with raw metadata
 - Inside each file:
   - **Zod input schema** and `type` alias inferred from it.
   - **Zod output schema** and `type` alias inferred from it.
