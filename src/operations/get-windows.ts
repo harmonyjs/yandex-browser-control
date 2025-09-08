@@ -6,22 +6,9 @@
  */
 
 import { z } from "zod";
-import { operation, schemas as as } from "@avavilov/apple-script";
+import { operation } from "@avavilov/apple-script";
 import { emptySchema } from "../models/common/empty.js";
-import { nonNegativeIntSchema } from "../models/common/non-negative-int.js";
-import { windowModeSchema } from "../models/common/window-mode.js";
-
-const getWindowsRowSchema = as.record({
-  windowId: nonNegativeIntSchema,
-  index: nonNegativeIntSchema,
-  mode: windowModeSchema,
-  // "{x, y, w, h}" or AppleScript list → [x, y, w, h]
-  bounds: as.bounds,
-  // Normalize truthy strings like "1"/"true" to boolean
-  visible: as.boolean,
-  minimized: as.boolean,
-  zoomed: as.boolean,
-});
+import { windowMetaSchema } from "../models/window-meta.js";
 
 /**
  * Input schema for `get-windows` operation: explicit empty object.
@@ -32,9 +19,8 @@ export type GetWindowsInput = z.infer<typeof getWindowsInputSchema>;
 /**
  * Output schema for `get-windows` operation: array of WindowMeta rows.
  */
-export const getWindowsOutputSchema = z.array(getWindowsRowSchema);
+export const getWindowsOutputSchema = z.array(windowMetaSchema);
 export type GetWindowsOutput = z.infer<typeof getWindowsOutputSchema>;
-export type GetWindowsRow = z.infer<typeof getWindowsRowSchema>;
 
 /**
  * Return a snapshot of all browser windows.

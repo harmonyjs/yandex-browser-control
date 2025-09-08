@@ -2,6 +2,8 @@
 
 This directory contains reusable, typed data contracts for the **Operations** layer. These models describe the stable shapes returned by AppleScript-backed operations and consumed by higher layers (Tools and Scenarios). They are intentionally minimal, focused, and independent of operation-specific inputs and outputs.
 
+**Key principle**: Models in this directory are strictly **AppleScript-aware schemas**. They handle normalization of AppleScript return values (strings, numbers, arrays) into strongly-typed TypeScript objects using `@avavilov/apple-script` normalization schemas.
+
 ## What is included
 
 - **Stable, reusable payload shapes** produced by multiple operations (for example, raw tab snapshots, window metadata, per-id operation outcomes, and JavaScript execution results).
@@ -16,9 +18,17 @@ This directory contains reusable, typed data contracts for the **Operations** la
 
 1. **Single responsibility per file**: each file defines precisely one Zod schema and its inferred TypeScript type.
 2. **No cross-dependencies inside `common`**: files under `src/models/common/` must not import each other to prevent accidental dependency webs.
-3. **Coercion at the edge**: AppleScript often returns textual values. Models use numeric and boolean coercion where appropriate to expose strongly typed fields to callers.
-4. **Shape stability**: once published, the field set and semantics of each model must remain stable. Additive extensions are allowed only when they are optional and do not break existing consumers.
-5. **Operations-first semantics**: models reflect what the browser exposes via AppleScript (raw state and generic outcomes). Any enriched or normalized data belongs to the Tools layer.
+3. **Coercion at the edge**: AppleScript often returns textual values. Models use numeric and boolean coercion where appropriate to expose strongly typed fields to callers. We exclusively use the canonical validators from `@avavilov/apple-script`:
+   - `as.boolean` for "true"/"false" string normalization
+   - `as.number` for numeric string parsing
+   - `as.bounds` for window bounds objects
+   - `as.record(shape)` for row normalization with **strict-by-default** behavior (since v0.3.0)
+4. **Unified schema pattern**: Each model exports a single schema using `as.record(shape)` which:
+   - Normalizes AppleScript row arrays into typed objects
+   - Enforces strict key validation by default (rejects unknown fields)
+   - Shares the shape definition to avoid duplication
+5. **Shape stability**: once published, the field set and semantics of each model must remain stable. Additive extensions are allowed only when they are optional and do not break existing consumers.
+6. **Operations-first semantics**: models reflect what the browser exposes via AppleScript (raw state and generic outcomes). Any enriched or normalized data belongs to the Tools layer.
 
 ## Files and intent
 
@@ -41,9 +51,6 @@ This directory contains reusable, typed data contracts for the **Operations** la
 
 - **`src/models/common/window-mode.ts`**  
   The window mode enumeration with two values: normal and incognito. This aligns with what browsers expose through their AppleScript dictionaries.
-
-- **`src/models/common/bounds.ts`**  
-  A rectangle tuple representing window position and size: `[x, y, width, height]`. All components are integers, which is sufficient for typical window arrangement operations.
 
 - **`src/models/common/empty.ts`**  
   An explicit empty object used by read operations that do not accept parameters. This makes operation signatures uniform and self-documenting.

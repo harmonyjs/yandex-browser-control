@@ -13,8 +13,10 @@ Operations are intentionally **atomic, predictable, and stable**. They expose ra
 - Inside each file:
   - **Zod input schema** and `type` alias inferred from it.
   - **Zod output schema** and `type` alias inferred from it.
+  - **Column mapping** (for `rows` operations): the `columns` array that maps AppleScript row indices to object keys.
   - The **exported `operation.*()` instance** (`rows`, `scalar`, `action`, or `sections`) that binds AppleScript code to the schemas.
-- Operations **may import reusable models** from `src/models/**` for common payload shapes (for example, `TabRaw`, `WindowMeta`, `PerIdResult`).
+- Operations **import normalization schemas** from `src/models/**` for row parsing (for example, `tabRawSchema`, `windowMetaSchema`).
+- Operations **own the column order** and the AppleScript code. Models only define the shape and normalization rules.
 - Operations **do not** depend on the runner; creating and configuring a runner (`createAppleRunner`) happens outside this directory.
 
 ## What does not live here
@@ -38,6 +40,11 @@ Operations are intentionally **atomic, predictable, and stable**. They expose ra
   - For `rows`, specify a `columns` array to deterministically map AppleScript row arrays to object keys expected by the output schema.
 - **AppleScript scope**: keep scripts minimal and deterministic. Handle `missing value` explicitly and return the exact structure expected by the chosen kind.
 - **No cross-operation coupling**: operations do not import each other. Reuse shared models from `src/models/**` instead.
+- **Export convention**: Operations export **only** these public APIs:
+  - `<OperationName>InputSchema` and `<OperationName>Input` type
+  - `<OperationName>OutputSchema` and `<OperationName>Output` type
+  - The operation instance itself (e.g., `getTabs`)
+  - No intermediate types or row schemas are exported
 
 ## Testing
 
@@ -52,4 +59,8 @@ Co-locate small integration tests (e.g., `*.integration.spec.ts`) with operation
     
 ## Rationale
 
-Keeping input/output schemas **co-located** with their operation makes contracts explicit and reviewable, while shared payload models live in `src/models/**` to prevent duplication and drift. This separation preserves the Operations layer as a **thin, testable, and stable boundary** over AppleScript, enabling faster iteration in Tools and Scenarios without risking regressions here.
+Keeping input/output schemas **co-located** with their operation makes contracts explicit and reviewable, while shared payload models live in `src/models/**` to prevent duplication and drift. The separation of concerns is clear:
+- **Models**: Define AppleScript-aware normalization schemas (using `as.record` from `@avavilov/apple-script`)
+- **Operations**: Own the column mapping, AppleScript code, and operation configuration
+
+This separation preserves the Operations layer as a **thin, testable, and stable boundary** over AppleScript, enabling faster iteration in Tools and Scenarios without risking regressions here.

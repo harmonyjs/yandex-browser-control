@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { schemas as as } from "@avavilov/apple-script";
 import { nonNegativeIntSchema } from "./common/non-negative-int.js";
 
 /**
@@ -8,7 +9,7 @@ import { nonNegativeIntSchema } from "./common/non-negative-int.js";
 export const perIdResultSchema = z
 	.object({
 		id: nonNegativeIntSchema,
-		ok: z.coerce.boolean(),
+		ok: as.boolean,
 		error: z.string().optional(),
 	})
 	.strict();
