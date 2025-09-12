@@ -20,20 +20,20 @@ function normalize(args: ListTabsArgs): NormalizedArgs {
   return { groupBy: 'none', ...args } as NormalizedArgs;
 }
 
-void test('[int] list_tabs basic invocation returns text output', { timeout: 60_000 }, async () => {
+void test('[int] [list-tabs] list_tabs basic invocation returns text output', { timeout: 60_000 }, async () => {
   const res = await runToolHandler(listTabsHandler, normalize({ groupBy: 'none' }));
   const body = getFirstTextBlock(res);
   assert.ok(/Found \d+ tab|No tabs found/i.test(body) || body.startsWith('Found '), 'contains summary line');
 });
 
-void test('[int] list_tabs grouping by host (orderBy=title) produces bullet list', { timeout: 30_000 }, async () => {
+void test('[int] [list-tabs] list_tabs grouping by host (orderBy=title) produces bullet list', { timeout: 30_000 }, async () => {
   const res = await runToolHandler(listTabsHandler, normalize({ groupBy: 'host', orderBy: 'title' }));
   const body = getFirstTextBlock(res);
   assert.ok(/Found \d+ tab|No tabs found/i.test(body) || body.startsWith('Found '));
   assert.ok(/• /.test(body), 'contains at least one bullet line');
 });
 
-void test('[int] list_tabs grouping by mode loads windows metadata', { timeout: 30_000 }, async () => {
+void test('[int] [list-tabs] list_tabs grouping by mode loads windows metadata', { timeout: 30_000 }, async () => {
   const res = await runToolHandler(listTabsHandler, normalize({ groupBy: 'mode' }));
   const body = getFirstTextBlock(res);
   // Mode grouping headings look like "## Normal mode" etc OR summary mentioning groups
@@ -42,7 +42,7 @@ void test('[int] list_tabs grouping by mode loads windows metadata', { timeout: 
   assert.ok(hasModeHeading || hasSummary, 'contains mode grouping indications');
 });
 
-void test('[int] list_tabs invalid regex pattern returns error', async () => {
+void test('[int] [list-tabs] list_tabs invalid regex pattern returns error', async () => {
   // Since we moved validation to middleware, we need to test it differently.
   // Import the module to access argsSchema for direct validation testing.
   const { module: listTabsModule } = await import('./index.js');
@@ -57,7 +57,7 @@ void test('[int] list_tabs invalid regex pattern returns error', async () => {
   }
 });
 
-void test('[int] list_tabs invalid hostFilter regex returns error', async () => {
+void test('[int] [list-tabs] list_tabs invalid hostFilter regex returns error', async () => {
   // Test hostFilter validation at schema level
   const { module: listTabsModule } = await import('./index.js');
   

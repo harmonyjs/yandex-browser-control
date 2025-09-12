@@ -27,19 +27,19 @@ const tabs: TabWithHost[] = [
   t({ tabId: 4, windowId: 3, title: 'Gamma', url: 'invalid', host: '(invalid)' }),
 ];
 
-void test('groupTabs by none collapses into single group', () => {
+void test('[list-tabs] groupTabs by none collapses into single group', () => {
   const groups = groupTabs(tabs, 'none');
   assert.equal(groups.size, 1);
   assert.deepEqual(groups.get('all')?.length, tabs.length);
 });
 
-void test('groupTabs by window', () => {
+void test('[list-tabs] groupTabs by window', () => {
   const groups = groupTabs(tabs, 'window');
   assert.deepEqual(Array.from(groups.keys()).sort(), ['1','2','3']);
   assert.equal(groups.get('2')?.length, 2);
 });
 
-void test('groupTabs by host uses semantic placeholder for invalid URL', () => {
+void test('[list-tabs] groupTabs by host uses semantic placeholder for invalid URL', () => {
   const groups = groupTabs(tabs, 'host');
   assert.ok(groups.has('(invalid)'));
   const invalidGroup = groups.get('(invalid)');
@@ -47,7 +47,7 @@ void test('groupTabs by host uses semantic placeholder for invalid URL', () => {
   assert.equal(invalidGroup?.[0].tabId, 4);
 });
 
-void test('groupTabs by mode uses window map (missing => unknown)', () => {
+void test('[list-tabs] groupTabs by mode uses window map (missing => unknown)', () => {
   const windowMap = new Map<number, WindowMeta>([
     [1, { windowId:1, index:0, mode:'normal', bounds:[0,0,0,0], visible:true, minimized:false, zoomed:false }],
     [2, { windowId:2, index:1, mode:'incognito', bounds:[0,0,0,0], visible:true, minimized:false, zoomed:false }],
@@ -59,7 +59,7 @@ void test('groupTabs by mode uses window map (missing => unknown)', () => {
   assert.equal(groups.get('unknown')?.[0].tabId, 4);
 });
 
-void test('sortGroups for window orders numerically and sorts tabs via orderBy', () => {
+void test('[list-tabs] sortGroups for window orders numerically and sorts tabs via orderBy', () => {
   const groups = groupTabs(tabs, 'window');
   const sorted = sortGroups(groups, 'window', 'title');
   // Windows should be 1,2,3
@@ -69,7 +69,7 @@ void test('sortGroups for window orders numerically and sorts tabs via orderBy',
   assert.deepEqual(win2?.map(t => t.title), ['Beta','Zeta']);
 });
 
-void test('sortGroups for mode respects normal < incognito ordering', () => {
+void test('[list-tabs] sortGroups for mode respects normal < incognito ordering', () => {
   const windowMap = new Map<number, WindowMeta>([
     [1, { windowId:1, index:0, mode:'incognito', bounds:[0,0,0,0], visible:true, minimized:false, zoomed:false }],
     [2, { windowId:2, index:1, mode:'normal', bounds:[0,0,0,0], visible:true, minimized:false, zoomed:false }],
@@ -80,7 +80,7 @@ void test('sortGroups for mode respects normal < incognito ordering', () => {
   assert.deepEqual(ordered.map(([k]) => k), ['normal','incognito','unknown']);
 });
 
-void test('sortGroups for host sorts case-insensitively', () => {
+void test('[list-tabs] sortGroups for host sorts case-insensitively', () => {
   const mixed: TabWithHost[] = [
     t({ host: 'B.com', url: 'https://B.com', title: 'B', tabId: 10 }),
     t({ host: 'a.com', url: 'https://a.com', title: 'A', tabId: 11 }),

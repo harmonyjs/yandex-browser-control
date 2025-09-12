@@ -18,19 +18,19 @@ function tab(p: Partial<TabWithHost>): TabWithHost {
   };
 }
 
-void test('formatOutput empty groups message', () => {
+void test('[list-tabs] formatOutput empty groups message', () => {
   const out = formatOutput([], 'none');
   assert.match(out, /No tabs found/);
 });
 
-void test('formatOutput single group none does not show group headers', () => {
+void test('[list-tabs] formatOutput single group none does not show group headers', () => {
   const groups: Array<[string, TabWithHost[]]> = [['all', [tab({ title: 'A', url: 'https://a', tabId: 2 })]]];
   const out = formatOutput(groups, 'none');
   assert.match(out, /Found 1 tab/);
   assert.ok(!out.includes('##'));
 });
 
-void test('formatOutput host grouping includes group headers and counts', () => {
+void test('[list-tabs] formatOutput host grouping includes group headers and counts', () => {
   const groups: Array<[string, TabWithHost[]]> = [
     ['a.com', [tab({ title: 'A', url: 'https://a.com', host: 'a.com', tabId: 1 })]],
     ['b.com', [tab({ title: 'B', url: 'https://b.com', host: 'b.com', tabId: 2 }), tab({ title: 'C', url: 'https://b.com/c', host: 'b.com', tabId: 3, loading: true })]],
@@ -43,7 +43,7 @@ void test('formatOutput host grouping includes group headers and counts', () => 
   assert.match(out, /\[Loading\]/); // Loading indicator present
 });
 
-void test('formatOutput mode grouping capitalizes and adds "mode" suffix', () => {
+void test('[list-tabs] formatOutput mode grouping capitalizes and adds "mode" suffix', () => {
   const groups: Array<[string, TabWithHost[]]> = [
     ['normal', [tab({ title: 'N', tabId: 10 })]],
     ['incognito', [tab({ title: 'I', tabId: 11 })]],
