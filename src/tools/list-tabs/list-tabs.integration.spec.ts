@@ -1,12 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { handler as listTabsHandler } from './index.js';
-import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import type { ToolExtra } from '../types.js';
+import { runToolHandler, getFirstTextBlock } from '../test-utils.js';
 
-// Minimal ToolExtra stub
-const extraStub = { signal: new AbortController().signal } as unknown as ToolExtra;
-
+// Mirror public Args shape (subset) – groupBy optional here but we normalize before call.
 interface ListTabsArgs {
   pattern?: string;
   groupBy?: 'none' | 'window' | 'host' | 'mode';
@@ -17,42 +14,28 @@ interface ListTabsArgs {
   orderBy?: 'title' | 'url' | 'host' | 'windowId' | 'tabId' | 'loading' | 'mode';
 }
 
-async function runTool(args: ListTabsArgs): Promise<CallToolResult> {
-  const normalizedArgs: Required<Pick<ListTabsArgs,'groupBy'>> & Omit<ListTabsArgs,'groupBy'> = { groupBy: 'none', ...args };
-  const result = await listTabsHandler(normalizedArgs as {
-    groupBy: 'none' | 'window' | 'host' | 'mode';
-    pattern?: string; windowId?: number | number[]; mode?: 'normal' | 'incognito'; loading?: boolean; hostFilter?: string; orderBy?: 'title' | 'url' | 'host' | 'windowId' | 'tabId' | 'loading' | 'mode';
-  }, extraStub);
-  if (result.isError === true) {
-    const first = Array.isArray(result.content) ? result.content[0] : undefined;
-    const rawMessage = first && first.type === 'text' ? first.text : 'Unknown tool error';
-    assert.fail(rawMessage);
-  }
-  return result;
+type NormalizedArgs = Omit<ListTabsArgs, 'groupBy'> & { groupBy: 'none' | 'window' | 'host' | 'mode' };
+
+function normalize(args: ListTabsArgs): NormalizedArgs {
+  return { groupBy: 'none', ...args } as NormalizedArgs;
 }
 
 void test('[int] list_tabs basic invocation returns text output', { timeout: 60_000 }, async () => {
-  const res = await runTool({});
-  const textItem = res.content.find((c): c is { type: 'text'; text: string } => c.type === 'text');
-  assert.ok(textItem, 'text item present');
-  const body: string = textItem?.text ?? '';
+  const res = await runToolHandler(listTabsHandler, normalize({ groupBy: 'none' }));
+  const body = getFirstTextBlock(res);
   assert.ok(/Found \d+ tab|No tabs found/i.test(body) || body.startsWith('Found '), 'contains summary line');
 });
 
 void test('[int] list_tabs grouping by host (orderBy=title) produces bullet list', { timeout: 30_000 }, async () => {
-  const res = await runTool({ groupBy: 'host', orderBy: 'title' });
-  const textItem = res.content.find((c): c is { type: 'text'; text: string } => c.type === 'text');
-  assert.ok(textItem, 'text item present');
-  const body: string = textItem?.text ?? '';
+  const res = await runToolHandler(listTabsHandler, normalize({ groupBy: 'host', orderBy: 'title' }));
+  const body = getFirstTextBlock(res);
   assert.ok(/Found \d+ tab|No tabs found/i.test(body) || body.startsWith('Found '));
   assert.ok(/• /.test(body), 'contains at least one bullet line');
 });
 
 void test('[int] list_tabs grouping by mode loads windows metadata', { timeout: 30_000 }, async () => {
-  const res = await runTool({ groupBy: 'mode' });
-  const textItem = res.content.find((c): c is { type: 'text'; text: string } => c.type === 'text');
-  assert.ok(textItem, 'text item present');
-  const body: string = textItem?.text ?? '';
+  const res = await runToolHandler(listTabsHandler, normalize({ groupBy: 'mode' }));
+  const body = getFirstTextBlock(res);
   // Mode grouping headings look like "## Normal mode" etc OR summary mentioning groups
   const hasModeHeading = /## .* mode/i.test(body);
   const hasSummary = /Grouped by: mode/.test(body);
