@@ -136,6 +136,6 @@ async function loadWindowsIfNeeded(
 export const module = defineTool<Input>({
   name,
   description,
-  argsSchema,  // NEW: provide full Zod schema for automatic validation
+  argsSchema,
   handler,
 });
