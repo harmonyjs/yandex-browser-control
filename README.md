@@ -52,9 +52,61 @@ logging to file: /var/folders/…/yandex-browser-control.log.12345
 
 You can control verbosity with the `LOG_LEVEL` env variable (default: `info`).
 
+### Timeout Configuration
+
+AppleScript executions have a unified timeout applied at the runner level. This prevents scattered per-call overrides and keeps both AppleScript and controller layers consistent.
+
+Environment variable:
+
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `APPLE_RUNNER_TIMEOUT_MS` | `60000` | Global timeout (milliseconds) for AppleScript execution (converted internally to seconds) and the Node.js controller watchdog. |
+
+Behavior & precedence (from the underlying `@avavilov/apple-script` library):
+
+1. Per-run override (`apple.run(op, input, { timeoutSec })`)
+2. `timeoutByKind` (if set on runner config)
+3. `defaultTimeoutSec` (derived from `APPLE_RUNNER_TIMEOUT_MS` in `src/runtime/apple-runner.ts`)
+4. Library fallback
+
+We intentionally rely on (3) so ordinary calls do not need explicit options. Increase the timeout if you experience timeouts on large tab counts or heavy system load:
+
+```bash
+APPLE_RUNNER_TIMEOUT_MS=90000 npm run dev
+```
+
+Tests now fail (not skip) on timeout to surface real instability early. If you hit genuine timeouts, adjust the env var rather than reintroducing skip logic.
+
 ### Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for development, build, and code quality instructions.
+
+### Testing Strategy
+
+We separate fast unit tests from slower AppleScript-driven integration tests by naming convention:
+
+* Integration test names are prefixed with `[int]` (see `*.integration.spec.ts`).
+* To run only unit tests (skipping integration by name):
+
+```
+npm run test:unit
+```
+
+This invokes Node's test runner with `--test-skip-pattern '^\[int\]'` before the `--test` glob so integration test definitions are filtered by name without adding custom environment flags.
+
+Run integration tests explicitly:
+
+```
+npm run test:int
+```
+
+Or everything (unit first, then integration):
+
+```
+npm test
+```
+
+Rationale: `--test-skip-pattern` filters test *names*, not files. We keep a dedicated `test:int` script so integration specs are still discoverable and runnable in isolation.
 
 ### Project Structure
 
@@ -65,11 +117,14 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for development, build, and code qualit
 ### Tools
 
 - Each tool lives in `src/tools/<tool-name>/index.ts` and should export:
-  - `name` and `description` strings
-  - `inputSchema` (Zod raw shape) when the tool takes parameters; omit `inputSchema` entirely for no-arg tools
-  - `handler` function returning `{ content: [{ type: 'text', text: string }] }` or structured content
-  - any `types` (e.g., `Input`, `Output`)
+	- `name` and `description` (strings / const assertions)
+	- `argsSchema` (a Zod schema; use `z.object({})` for no-arg tools)
+	- `handler` (receives already-validated args) returning MCP `CallToolResult`
+	- `Args` type (e.g. `export type Args = z.infer<typeof argsSchema>`) for consumers
+	- (Optional) `annotations`
 - Register all tools in `src/tools/index.ts` via `registerTools(server)`, which is invoked from `src/index.ts`.
+
+See detailed per-tool documentation (including `list_tabs`) in [`src/tools/README.md`](./src/tools/README.md#tool-reference).
 
 ### License
 

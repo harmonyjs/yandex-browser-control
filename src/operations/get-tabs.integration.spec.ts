@@ -1,45 +1,23 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  isSuccess,
-  getUserFriendlyMessage,
-  isAppleScriptError,
-  isTimeoutError,
-  OutputValidationError,
-  InputValidationError,
-  InvalidReturnTypeError,
-  ParseError,
-} from "@avavilov/apple-script";
+import { isSuccess, getUserFriendlyMessage, isAppleScriptError, isTimeoutError } from "@avavilov/apple-script";
 import { apple } from "../runtime/apple-runner.js";
 import { getTabsOperation } from "./get-tabs.js";
 
-// Classify run error into fail-or-skip with a message
-function classifyRunError(error: unknown): { mode: "fail" | "skip"; message: string } {
-  // error is OperationError; get user-friendly string first
+// Error handling policy: ANY error is a test failure (no skips)
+function formatRunError(error: unknown): string {
   const message = getUserFriendlyMessage(error);
   const cause = (error as { cause?: unknown } | undefined)?.cause;
-
-  const isProtocolValidation =
-    isAppleScriptError(cause) &&
-    (cause instanceof OutputValidationError ||
-      cause instanceof InputValidationError ||
-      cause instanceof InvalidReturnTypeError ||
-      cause instanceof ParseError);
-
-  if (isProtocolValidation) return { mode: "fail", message: `Operation schema/protocol error: ${message}` };
-  if (isTimeoutError(cause)) return { mode: "skip", message: `Yandex Browser timeout: ${message}` };
-  if (isAppleScriptError(cause)) return { mode: "skip", message: `Yandex Browser not available or script error: ${message}` };
-  return { mode: "skip", message: `Yandex Browser unavailable: ${message}` };
+  if (isTimeoutError(cause)) return `Timeout executing get-tabs: ${message}`;
+  if (isAppleScriptError(cause)) return `AppleScript error executing get-tabs: ${message}`;
+  return `Unexpected error executing get-tabs: ${message}`;
 }
 
-void test("get-tabs returns valid TabRaw[] shape", { timeout: 30_000 }, async (t) => {
+void test("[int] get-tabs returns valid TabRaw[] shape", { timeout: 60_000 }, async () => {
   const result = await apple.run(getTabsOperation, {});
 
   if (!isSuccess(result)) {
-    const { mode, message } = classifyRunError(result.error);
-    if (mode === "fail") assert.fail(message);
-    t.skip(message);
-    return;
+    assert.fail(formatRunError(result.error));
   }
 
   // Result is already validated by the runner (validateByDefault: true)
