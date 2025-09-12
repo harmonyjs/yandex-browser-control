@@ -1,13 +1,5 @@
 import type { WindowMeta } from "../../models/window-meta.js";
-import { LARGE_RESULT_THRESHOLD } from "../../utils/constants.js";
-
-export function formatHeader(total: number): string {
-  let header = `Found ${total} window${total === 1 ? '' : 's'}`;
-  if (total > LARGE_RESULT_THRESHOLD) {
-    header = `WARNING: Large result set (${total} windows) – consider refining filters.\n\n` + header;
-  }
-  return header;
-}
+import { formatCountHeader } from "../shared/headers.js";
 
 export function formatWindowLine(w: WindowMeta): string {
   const [x, y, width, height] = w.bounds;
@@ -21,7 +13,7 @@ export function formatWindowLine(w: WindowMeta): string {
 
 export function formatList(rows: WindowMeta[]): string {
   if (rows.length === 0) return 'No windows found matching the criteria.';
-  const header = formatHeader(rows.length);
+  const header: string = formatCountHeader({ count: rows.length, singular: "window" });
   const body = rows.map(formatWindowLine).join('\n');
   return `${header}\n\n${body}`;
 }

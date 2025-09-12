@@ -19,7 +19,6 @@ import { formatOutput } from "./formatters.js";
 import { groupTabs, sortGroups } from "./grouping.js";
 import type { TabWithHost } from "./types.js";
 import { applyFilters, needsWindowData } from "./filters.js";
-import { LARGE_RESULT_THRESHOLD } from "../../utils/constants.js";
 
 /** Tool name exposed to MCP hosts (snake_case per convention). */
 export const name = "list_tabs" as const;
@@ -101,15 +100,8 @@ export async function handler(args: Input, _extra: ToolExtra): Promise<CallToolR
   // Step 4-6: Group, sort, and format
   const groups = groupTabs(tabs, args.groupBy, windowModeMap);
   const sortedGroups = sortGroups(groups, args.groupBy, args.orderBy);
-  let output = formatOutput(sortedGroups, args.groupBy);
-  const totalTabs = tabs.length;
-  if (totalTabs > LARGE_RESULT_THRESHOLD) {
-    output = `WARNING: Large result set (${totalTabs} tabs) – consider refining filters.\n\n` + output;
-  }
-
-  return {
-    content: [{ type: "text", text: output }],
-  };
+  const output = formatOutput(sortedGroups, args.groupBy);
+  return { content: [{ type: "text", text: output }] };
 }
 
 /**

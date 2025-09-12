@@ -15,6 +15,7 @@
 
 import type { GroupKey } from "./schemas.js";
 import type { TabWithHost } from "./types.js";
+import { formatCountHeader } from "../shared/headers.js";
 
 export function formatOutput(
   groups: Array<[string, TabWithHost[]]>,
@@ -27,8 +28,12 @@ export function formatOutput(
   const lines: string[] = [];
   const totalTabs = groups.reduce((sum, [, tabs]) => sum + tabs.length, 0);
 
-  // Summary
-  lines.push(`Found ${totalTabs} tab${totalTabs !== 1 ? "s" : ""}`);
+  // Summary (with large result warning handled inside formatter)
+  {
+    // Extract to local variable so linter recognizes concrete string type
+    const summaryHeader: string = formatCountHeader({ count: totalTabs, singular: "tab" });
+    lines.push(summaryHeader);
+  }
   if (groupBy !== "none" && groups.length > 1) {
     lines.push(`Grouped by: ${groupBy} (${groups.length} groups)`);
   }

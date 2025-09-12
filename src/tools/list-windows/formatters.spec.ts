@@ -1,13 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { formatHeader, formatWindowLine, formatList } from './formatters.js';
+import { formatWindowLine, formatList } from './formatters.js';
 import type { WindowMeta } from '../../models/window-meta.js';
 
 const row: WindowMeta = { windowId: 1, index: 0, mode: 'normal', bounds: [10,20,800,600], visible: true, minimized: false, zoomed: true };
 
-void test('[list-windows] formatHeader singular/plural', () => {
-  assert.equal(formatHeader(1).startsWith('Found 1 window'), true);
-  assert.equal(formatHeader(2).startsWith('Found 2 windows'), true);
+void test('[list-windows] formatList singular/plural header via list', () => {
+  const single = formatList([{ windowId: 1, index: 0, mode: 'normal', bounds: [0,0,0,0], visible: true, minimized: false, zoomed: false }]);
+  assert.match(single, /^Found 1 window/);
+  const plural = formatList([
+    { windowId: 1, index: 0, mode: 'normal', bounds: [0,0,0,0], visible: true, minimized: false, zoomed: false },
+    { windowId: 2, index: 1, mode: 'normal', bounds: [0,0,0,0], visible: true, minimized: false, zoomed: false },
+  ]);
+  assert.match(plural, /^Found 2 windows/);
 });
 
 void test('[list-windows] formatWindowLine contains fields', () => {
