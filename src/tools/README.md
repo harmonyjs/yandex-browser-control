@@ -303,3 +303,57 @@ Edge cases:
 
 - No matches → `"No tabs found matching the criteria."`
 - Large counts are listed fully (future enhancement may warn when counts exceed a threshold).
+
+### list_windows
+
+Lists browser windows with optional filtering and single-key sorting. Plain text output optimized for broad MCP host compatibility.
+
+Inputs (all optional):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `windowId` | number or number[] | Restrict to specific window id(s). Empty array returns no results. |
+| `mode` | `"normal" | "incognito"` | Filter by window mode. |
+| `orderBy` | `"windowId" | "index" | "mode" | "visible" | "minimized" | "zoomed"` | Sort criterion (ascending / false<true). Omitted → original order. |
+
+Sorting semantics:
+
+- `mode`: ordering `normal < incognito < (unexpected)`.
+- Boolean fields: `false` before `true`.
+- Stable tiebreaker: `windowId` then `index` to keep output deterministic.
+
+Output format:
+
+```
+Found N window(s)
+
+• [windowId=1] index=0 mode=normal bounds={x, y, w, h} state=visible zoomed
+• [windowId=2] index=1 mode=normal bounds={...} state=hidden minimized
+• [windowId=3] index=2 mode=incognito bounds={...} state=visible
+```
+
+`state` tokens logic:
+
+- Always includes one of: `visible` | `hidden` (derived from `visible` flag).
+- Adds `minimized` if minimized.
+- Adds `zoomed` if zoomed.
+
+Edge cases:
+
+- No matching windows → `No windows found matching the criteria.`
+- Large result (`> LARGE_RESULT_THRESHOLD`) prepends a warning banner.
+
+Examples:
+
+1. List all windows sorted by index:
+  ```json
+  { "orderBy": "index" }
+  ```
+2. Incognito windows only:
+  ```json
+  { "mode": "incognito" }
+  ```
+3. Specific windows (1 and 3) sorted by minimized state:
+  ```json
+  { "windowId": [1,3], "orderBy": "minimized" }
+  ```
