@@ -124,7 +124,7 @@ Rationale: `--test-skip-pattern` filters test *names*, not files. We keep a dedi
 	- (Optional) `annotations`
 - Register all tools in `src/tools/index.ts` via `registerTools(server)`, which is invoked from `src/index.ts`.
 
-See detailed per-tool documentation (including `list_tabs`) in [`src/tools/README.md`](./src/tools/README.md#tool-reference).
+See detailed per-tool documentation in [`src/tools/TOOLS.md`](./src/tools/TOOLS.md).
 
 ### License
 
