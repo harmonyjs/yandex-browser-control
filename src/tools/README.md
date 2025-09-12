@@ -1,8 +1,8 @@
-# How to create a new tool
+# Tools
 
-This project exposes MCP tools to control Yandex Browser on macOS. Each tool lives in its own folder and is registered through a single aggregator.
+This directory contains MCP tool modules.
 
-This guide shows how to add a new tool end-to-end, with examples for both parameterless and parameterized tools.
+Each tool lives in its own folder and is registered through the tools aggregator. This guide shows how to add a new tool end-to-end, with examples for both parameterless and parameterized tools.
 
 ## Where things live
 
@@ -89,67 +89,6 @@ export const module: ToolModule<Input> = {
 Notes:
 - The project deliberately keeps tool modules decoupled from the SDK’s Zod instance. You can safely pass `z.object(...)` as `inputSchema` — the central registrar handles the type boundary.
 
-## Tool that runs AppleScript
-
-Most tools in this server call AppleScript via `@avavilov/apple-script` and the `apple` runner. This gives you typed input/output and friendly errors.
-
-Example: count tabs (similar to the existing `count_windows_and_tabs` tool):
-
-```ts
-import type { ToolModule } from "../types.js";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { z } from "zod";
-import { operation, isSuccess, getUserFriendlyMessage } from "@avavilov/apple-script";
-import { logger } from "../../logger/index.js";
-import { apple } from "../../runtime/apple-runner.js";
-
-export const name = "count_tabs" as const;
-export const description = "Count all open tabs in Yandex Browser" as const;
-const log = logger.child({ tool: name });
-
-const countOpenTabs = operation.scalar({
-  name: "countOpenTabs",
-  input: z.object({}),
-  output: z
-    .string()
-    .transform((s) => {
-      const n = parseInt(String(s), 10);
-      if (!Number.isFinite(n)) throw new Error(`Not a number: ${s}`);
-      return n;
-    })
-    .pipe(z.number().int().nonnegative()),
-  script: () => `
-    set totalTabs to 0
-    try
-      set winCount to (count of windows)
-    on error
-      set winCount to 0
-    end try
-    if winCount > 0 then
-      repeat with w in windows
-        try
-          set totalTabs to totalTabs + (count of tabs of w)
-        on error
-        end try
-      end repeat
-    end if
-    return (totalTabs as text)
-  `,
-});
-
-export async function handler(): Promise<CallToolResult> {
-  const result = await apple.run(countOpenTabs, {});
-  if (!isSuccess(result)) {
-    const message = getUserFriendlyMessage(result.error);
-    log.error({ err: result.error }, "countOpenTabs failed");
-    return { isError: true, content: [{ type: "text", text: `Failed to count tabs: ${message}` }] };
-  }
-  return { content: [{ type: "text", text: String(result.data) }] };
-}
-
-export const module: ToolModule = { name, description, handler };
-```
-
 ## Accessing SDK context (extra)
 
 Handlers receive an `extra` context automatically through middleware. If your tool needs it (e.g., for cancellation), use the appropriate signature:
@@ -188,22 +127,3 @@ export const module: ToolModule = {
   handler,
 };
 ```
-
-## Verify locally
-
-- Typecheck and lint:
-  - `npm run typecheck`
-  - `npm run lint`
-- Run in dev mode (stdio MCP server):
-  - `npm run dev`
-  - On startup, logs go to stderr and also to a temp log file whose path is printed. You should see your tool listed in the "tools registration summary".
-- Connect from a host (e.g., Claude Desktop) and invoke your tool by its `name`.
-
-## Checklist
-
-- [ ] Create `src/tools/<tool-folder>/index.ts`
-- [ ] Export `name`, `description`, and `handler` (+ `inputSchema` if needed)
-- [ ] Export `module: ToolModule`
-- [ ] Register in `src/tools/index.ts`
-- [ ] `npm run typecheck && npm run lint`
-- [ ] `npm run dev` and confirm the tool registers and works

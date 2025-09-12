@@ -20,7 +20,7 @@ npm run dev
 
 For a step-by-step guide on adding a new MCP tool (structure, registration, Zod input schemas, AppleScript patterns, and verification), see:
 
-- docs/how-to-create-a-new-tool.md
+- src/tools/README.md
 
 ## Debug the server
 
