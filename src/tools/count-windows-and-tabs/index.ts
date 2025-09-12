@@ -1,4 +1,4 @@
-import type { ToolModule } from "../types.js";
+import { defineTool } from "../types.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { operation, isSuccess, getUserFriendlyMessage } from "@avavilov/apple-script";
@@ -10,6 +10,12 @@ export const name = "count_windows_and_tabs" as const;
 export const description = `
     Count total number of open windows and tabs in Yandex Browser on macOS
 ` as const;
+
+// Input schema (empty for no-argument tool)
+const argsSchema = z.object({});
+
+/** Exported argument type for external consumers. */
+export type Args = z.infer<typeof argsSchema>;
 
 const log = logger.child({ tool: name });
 
@@ -67,8 +73,10 @@ export async function handler(): Promise<CallToolResult> {
 }
 
 // Tool module export (unified contract)
-export const module: ToolModule = {
+export const module = defineTool({
   name,
   description,
-  handler,
-};
+  argsSchema,
+  // Ignore args; middleware always supplies an object
+  handler: async (): Promise<CallToolResult> => handler(),
+});
