@@ -44,6 +44,21 @@ export const LOG_LEVEL = env("LOG_LEVEL", process.env.LOG_LEVEL)
   .tap(collectReport)
   .value();
 
+// Default timeout for AppleScript operations (ms) – raised to 60s to reduce flakiness under load.
+export const DEFAULT_APPLE_RUNNER_TIMEOUT_MS = 60_000;
+
+// Timeout (ms) for AppleScript operations. Allows slower environments to adjust without code changes.
+// Defaults to 60000ms.
+export const APPLE_RUNNER_TIMEOUT_MS = env("APPLE_RUNNER_TIMEOUT_MS", process.env.APPLE_RUNNER_TIMEOUT_MS)
+  .transform(normalize)
+  .map((s) => {
+    const n = Number.parseInt(s, 10);
+    return Number.isFinite(n) && n > 0 ? n : undefined;
+  })
+  .default(DEFAULT_APPLE_RUNNER_TIMEOUT_MS)
+  .tap(collectReport)
+  .value();
+
 /**
  * Examples for future:
  *

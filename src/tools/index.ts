@@ -6,40 +6,42 @@ import { registerToolModule } from "./register-tool.js";
 
 // Import individual tools' register functions and metadata
 import { module as countWindowsAndTabs } from "./count-windows-and-tabs/index.js";
+import { module as listTabs } from "./list-tabs/index.js";
 
 const log = logger.child({ scope: "tools" });
 
-const tools: Array<ToolModule> = [
-  countWindowsAndTabs,
-  // next tools here...
-];
-
 export function registerTools(server: McpServer): void {
-  const failed: Array<{ name: string; error: unknown }> = [];
-  let registered = 0;
+  const stats = { total: 0, registered: 0, failed: [] as Array<{ name: string; error: unknown }> };
 
-  for (const t of tools) {
-    log.info({ tool: t.name, description: t.description }, "registering tool");
+  // Local registration helper with integrated logging and error handling
+  const register = (module: ToolModule): void => {
+    stats.total++;
+    log.info({ tool: module.name, description: module.description }, "registering tool");
+    
     try {
-      registerToolModule(server, t);
-      registered += 1;
-      log.info({ tool: t.name }, "tool registered");
+      registerToolModule(server, module);
+      stats.registered++;
+      log.info({ tool: module.name }, "tool registered");
     } catch (err) {
-      failed.push({ name: t.name, error: err });
-      log.error({ tool: t.name, err }, "tool registration failed");
+      stats.failed.push({ name: module.name, error: err });
+      log.error({ tool: module.name, err }, "tool registration failed");
     }
-  }
-
-  const summary = {
-    total: tools.length,
-    registered,
-    failed: failed.length,
-    failedTools: failed.map((f) => f.name),
   };
 
-  log.info(summary, "tools registration summary");
+  // Register each tool imperatively - just add a line here for new tools
+  register(countWindowsAndTabs);
+  register(listTabs);
+  // register(newTool); // future tools
 
-  if (registered > 0) {
+  // Summary
+  log.info({
+    total: stats.total,
+    registered: stats.registered,
+    failed: stats.failed.length,
+    failedTools: stats.failed.map((f) => f.name),
+  }, "tools registration summary");
+
+  if (stats.registered > 0) {
     server.sendToolListChanged();
   }
 }

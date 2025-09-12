@@ -1,3 +1,13 @@
+/**
+ * @fileoverview Unified ToolModule contract & helpers.
+ *
+ * Goals:
+ *  - Single handler shape (args, extra) for every tool (no dual overload drift).
+ *  - Decouple local Zod usage; pipeline (register-tool) extracts raw shape.
+ *  - Centralize type utilities (ToolArgs) for consumer inference.
+ *
+ * See tools/README.md for architectural rationale & middleware stack.
+ */
 import type {
   CallToolResult,
   ToolAnnotations,
@@ -5,11 +15,9 @@ import type {
   ServerRequest,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import type { z } from "zod";
 
-// Minimal, unified contract for tool modules without tight type coupling.
-// When a tool has parameters, provide `inputSchema` (Zod raw shape) and a handler that
-// receives (args, extra). For parameterless tools, omit `inputSchema` and provide a handler
-// that receives only (extra).
+// All tools supply an argsSchema (z.object({}) for no-arg tools) + unified handler.
 /**
  * Common metadata shared by all tool modules.
  */
@@ -29,38 +37,39 @@ export type ToolExtra = RequestHandlerExtra<ServerRequest, ServerNotification>;
  * Tool module with parameters.
  *
  * Generic Args represents the parsed arguments object that the SDK will pass to the handler
- * after validating against the provided Zod raw shape (inputSchema).
+ * after validating against the provided Zod schema.
  *
  * Notes:
- * - inputSchema should be a Zod raw shape (i.e., a map of field: zodType) — we keep it typed as
- *   Record<string, unknown> here to avoid coupling to a specific Zod instance.
  * - Handlers are always async for simplicity and consistency.
+ * - Input validation is centralized via middleware using `argsSchema`.
  */
-export type ToolModuleWithArgs<Args = unknown> = ToolModuleBase & {
-  inputSchema: Record<string, unknown>;
-  /**
-   * Handler receives:
-   * - args: parsed arguments validated against `inputSchema` by the SDK.
-   * - extra: typed context object (ToolExtra) provided by the SDK for the current call.
-   */
-  handler: (args: Args, extra: ToolExtra) => Promise<CallToolResult>;
-};
+// ===== Unified form (always takes args object) =====
+
+export interface ToolModule extends ToolModuleBase {
+  argsSchema: z.ZodType<unknown>; // runtime schema; unknown keeps boundary narrow
+  handler: (args: unknown, extra: ToolExtra) => Promise<CallToolResult>;
+}
 
 /**
- * Tool module without parameters.
+ * Factory for creating a ToolModule. Always requires an `argsSchema`. For tools
+ * without arguments, pass `z.object({})` and write a handler that ignores its args.
  */
-export type ToolModuleNoArgs = ToolModuleBase & {
-  // Explicitly no input schema
-  inputSchema?: undefined;
-  /**
-   * Handler receives only the SDK-provided `extra` context (see docs above).
-   */
-  handler: (extra: ToolExtra) => Promise<CallToolResult>;
-};
+export function defineTool<Args>(spec: {
+  name: string;
+  description?: string;
+  annotations?: ToolAnnotations;
+  argsSchema: z.ZodType<Args>;
+  handler: ((args: Args, extra: ToolExtra) => Promise<CallToolResult>) | ((args: never, extra: ToolExtra) => Promise<CallToolResult>);
+}): ToolModule {
+  const { handler, argsSchema, ...metadata } = spec;
 
-/**
- * Union of tool module variants. Presence of inputSchema discriminates the handler signature.
- */
-export type ToolModule<Args = unknown> =
-  | ToolModuleNoArgs
-  | ToolModuleWithArgs<Args>;
+  const unifiedHandler = handler as (args: unknown, extra: ToolExtra) => Promise<CallToolResult>;
+  return { ...metadata, argsSchema, handler: unifiedHandler };
+}
+
+/** Convenience empty schema factory (avoid shared mutable identity). */
+export const emptyInput = () => ({}) as const;
+
+/** Extract argument type from a ToolModule (utility). */
+export type ToolArgs<T extends ToolModule> = T['argsSchema'] extends z.ZodType<infer U> ? U : never;
+

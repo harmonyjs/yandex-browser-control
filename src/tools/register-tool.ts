@@ -1,88 +1,59 @@
 /**
- * Centralized registration helper for ToolModule.
+ * @fileoverview Registers ToolModules against the MCP server using a unified (args, extra) handler shape.
  *
- * Why this file exists:
- * - The MCP SDK exposes `server.registerTool(...)` with several overloads that depend on
- *   whether a tool has parameters (inputSchema) or not. Tools without params use a handler
- *   signature `(extra) => ...`, while tools with params use `(args, extra) => ...`.
- * - Our ToolModule type is intentionally decoupled from the SDK’s internal Zod types to avoid
- *   coupling every tool to a specific Zod instance/version bundled inside the SDK.
- * - Because of that decoupling, there is a small type gap at the single call site where we
- *   pass `inputSchema` into `server.registerTool`. We bridge that with one narrowly-scoped
- *   `as any` cast below, so individual tools stay clean and strongly-typed locally.
+ * Key points:
+ *  - Decouples local Zod schema instance: we extract raw shape (see extractZodShape) for the SDK.
+ *  - Middleware chain (validation → abort → logging) applies uniformly; order defined here.
+ *  - One controlled boundary cast only; runtime validation still enforced by the SDK.
  *
- * Important: This cast does NOT hide runtime problems. The SDK still validates inputs at
- * runtime using its own Zod; invalid schemas or arguments will fail during the call, as
- * expected. The cast here only resolves a compile-time nominal-typing mismatch between the
- * SDK’s internal Zod and the workspace types.
+ * See tools/README.md for broader architecture rationale.
  */
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolExtra, ToolModule } from "./types.js";
-import { chain, type Runner } from "../utils/middleware/index.js";
+import type { ToolContext } from "./middlewares/context.js";
 import { withAbort } from "./middlewares/abort.js";
 import { withLogging } from "./middlewares/logging.js";
+import { withValidation } from "./middlewares/validation.js";
+import { extractZodShape } from "./utils/zod-helpers.js";
 
-/**
- * Single entry point to execute a handler through the wrapper pipeline.
- */
-function runThrough<T>(
-  name: string,
-  extra: ToolExtra,
-  leaf: Runner<T>,
-): Promise<T> {
-  const runner = chain<T>(
-    // Order matters: topmost wraps below ones
-    withLogging<T>(name, extra),
-    withAbort<T>(name, extra),
-  )(leaf);
-  return runner();
+// Execute tool through middleware stack.
+function runThrough(ctx: ToolContext): Promise<CallToolResult> {
+  // Leaf runner: invoke the tool handler
+  const leaf = (): Promise<CallToolResult> => ctx.mod.handler(ctx.args, ctx.extra);
+  
+  // Ordered outer→inner: logging (finish timing), abort (early cancel), validation (argument parsing)
+  const middlewares = [
+    withLogging<CallToolResult>(),
+    withAbort<CallToolResult>(),
+    withValidation(),
+  ];
+  
+  // Compose right-to-left
+  const finalRunner = middlewares.reduceRight(
+    (next, middleware) => middleware(ctx)(next),
+    leaf
+  );
+  
+  return finalRunner();
 }
+// Register a ToolModule on the server.
+export function registerToolModule(server: McpServer, mod: ToolModule): void {
+  // All tools now must provide argsSchema; derive raw shape for SDK schema bridging.
+  const rawArgsShape = extractZodShape(mod.argsSchema);
 
-// Registers a ToolModule on the given server with the correct callback signature.
-// Centralizes the minimal necessary casting to keep tool modules clean.
-export function registerToolModule<I = unknown>(
-  server: McpServer,
-  mod: ToolModule<I>,
-): void {
-  if (mod.inputSchema !== undefined) {
-    const cb = wrapWithArgs(mod.name, mod.handler);
-    // About the cast: The SDK bundles its own `zod`, so ZodRawShape is nominally different.
-    // We keep tools decoupled and cast only at this boundary. Runtime validation remains in SDK.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-    (server.registerTool as any)(
-      mod.name,
-      {
-        description: mod.description,
-        inputSchema: mod.inputSchema,
-        annotations: mod.annotations,
-      },
-      cb,
-    );
-  } else {
-    const cb = wrapNoArgs(mod.name, mod.handler);
-    // See note above re: single boundary cast due to Zod instance mismatch.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
-    (server.registerTool as any)(
-      mod.name,
-      { description: mod.description, annotations: mod.annotations },
-      cb,
-    );
-  }
-}
+  const metadata = {
+    description: mod.description,
+  rawArgsShape, // always present (may be empty object for no-arg tool)
+    ...(mod.annotations && { annotations: mod.annotations }),
+  };
 
-function wrapWithArgs<I>(
-  name: string,
-  fn: (args: I, extra: ToolExtra) => Promise<CallToolResult>,
-): (args: I, extra: ToolExtra) => Promise<CallToolResult> {
-  return async (args: I, extra: ToolExtra): Promise<CallToolResult> =>
-    runThrough<CallToolResult>(name, extra, () => fn(args, extra));
-}
+  // Always (args, extra); no-arg tools receive {} from hosts.
+  const handler = async (args: unknown, extra: ToolExtra): Promise<CallToolResult> => {
+    const ctx: ToolContext = { mod, args, extra };
+    return runThrough(ctx);
+  };
 
-function wrapNoArgs(
-  name: string,
-  fn: (extra: ToolExtra) => Promise<CallToolResult>,
-): (extra: ToolExtra) => Promise<CallToolResult> {
-  return async (extra: ToolExtra): Promise<CallToolResult> =>
-    runThrough<CallToolResult>(name, extra, () => fn(extra));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call
+  (server.registerTool as any)(mod.name, metadata, handler);
 }
