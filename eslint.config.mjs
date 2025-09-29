@@ -47,7 +47,8 @@ const TS_SRC_FILES = ['src/**/*.ts'];
 const LOGGER_FILE = ['src/logger/index.ts'];
 const TEST_AND_TOOL_FILES = [
   '**/*.test.ts',
-  '**/*.spec.ts'
+  '**/*.spec.ts',
+  '**/*.integration.spec.ts'
 ];
 
 // Style / baseline rules applied across JS and TS (merged into TS blocks as well)
@@ -93,7 +94,19 @@ const TS_SPECIFIC_RULES = {
   '@typescript-eslint/no-non-null-assertion': 'error',
   '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports', disallowTypeAnnotations: false }],
   '@typescript-eslint/consistent-type-exports': 'error',
-  '@typescript-eslint/no-restricted-imports': ['error', { paths: [], patterns: [] }],
+  '@typescript-eslint/no-restricted-imports': ['error', { 
+    paths: [
+      {
+        name: 'node:test',
+        message: 'Use Vitest (import { describe, it, expect } from \"vitest\") instead of node:test.'
+      },
+      {
+        name: 'node:assert/strict',
+        message: 'Use Vitest expect API instead of node:assert.'
+      }
+    ],
+    patterns: []
+  }],
   '@typescript-eslint/no-magic-numbers': [
     'error',
     { ignore: [0, 1, -1, Infinity], ignoreEnums: true, ignoreNumericLiteralTypes: true },
@@ -195,7 +208,7 @@ export default defineConfig([
       parser: tsParser,
       parserOptions: {
         ...(cfg.languageOptions?.parserOptions),
-        project: './tsconfig.json',
+        project: './tsconfig.eslint.json',
       },
       globals: {
         ...NODE_GLOBALS,
