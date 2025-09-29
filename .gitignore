@@ -22,6 +22,15 @@ lib-cov
 # Coverage directory used by tools like istanbul
 coverage
 *.lcov
+test-results/
+*.tap
+*.junit.xml
+
+# Vitest / debug logs
+*.vitest-timestamp-*.log
+
+# macOS temp AppleScript logs (explicit path patterns if copied out)
+*.osascript.log
 
 # nyc test coverage
 .nyc_output
@@ -90,6 +99,8 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+# NOTE: dist currently includes vitest.config.* build artifacts due to rootDir="./".
+# After tsconfig refinement these should disappear from publishable output.
 
 # Gatsby files
 .cache/

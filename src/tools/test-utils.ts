@@ -3,7 +3,6 @@
  * Centralizes common patterns: ToolExtra stub, running handlers, extracting text content.
  * Pure utilities – no side effects beyond creating abort controllers per call.
  */
-import assert from 'node:assert/strict';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ToolExtra } from './types.js';
 
@@ -51,7 +50,7 @@ export async function runToolHandler<Args>(
   const res = await handler(args, extra);
   if (res.isError === true) {
     const firstText = getFirstTextBlock(res);
-    assert.fail(firstText === '' ? 'Unknown tool error' : firstText);
+    throw new Error(firstText === '' ? 'Unknown tool error' : firstText);
   }
   return res;
 }

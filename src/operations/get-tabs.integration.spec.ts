@@ -1,5 +1,4 @@
-import test from "node:test";
-import assert from "node:assert/strict";
+import { describe, it, expect, test } from 'vitest';
 import { isSuccess, getUserFriendlyMessage, isAppleScriptError, isTimeoutError } from "@avavilov/apple-script";
 import { apple } from "../runtime/apple-runner.js";
 import { getTabsOperation } from "./get-tabs.js";
@@ -13,22 +12,24 @@ function formatRunError(error: unknown): string {
   return `Unexpected error executing get-tabs: ${message}`;
 }
 
-void test("[int] get-tabs returns valid TabRaw[] shape", { timeout: 60_000 }, async () => {
-  const result = await apple.run(getTabsOperation, {});
-
-  if (!isSuccess(result)) {
-    assert.fail(formatRunError(result.error));
-  }
-
-  // Result is already validated by the runner (validateByDefault: true)
-  const rows = result.data;
-
-  // Spot-check a few rows
-  for (const row of rows.slice(0, 3)) {
-    assert.ok(Number.isInteger(row.windowId) && row.windowId >= 0, "windowId is non-negative int");
-    assert.ok(Number.isInteger(row.tabId) && row.tabId >= 0, "tabId is non-negative int");
-    assert.equal(typeof row.title, "string", "title is string");
-    assert.equal(typeof row.url, "string", "url is string");
-    assert.equal(typeof row.loading, "boolean", "loading is boolean");
-  }
+// Run only on macOS because AppleScript is macOS-specific.
+describe('get-tabs integration', () => {
+  test.skipIf(process.platform !== 'darwin')('platform check (skipped on non-darwin)', () => {
+    // Marker test to indicate skip reason in reports.
+    expect(true).toBe(true);
+  });
+  it('[int] returns valid TabRaw[] shape', async () => {
+    const result = await apple.run(getTabsOperation, {});
+    if (!isSuccess(result)) {
+      throw new Error(formatRunError(result.error));
+    }
+    const rows = result.data;
+    for (const row of rows.slice(0, 3)) {
+      expect(Number.isInteger(row.windowId) && row.windowId >= 0).toBe(true);
+      expect(Number.isInteger(row.tabId) && row.tabId >= 0).toBe(true);
+      expect(typeof row.title).toBe('string');
+      expect(typeof row.url).toBe('string');
+      expect(typeof row.loading).toBe('boolean');
+    }
+  }, 60_000);
 });

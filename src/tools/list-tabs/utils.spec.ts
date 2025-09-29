@@ -1,50 +1,51 @@
 /**
  * @fileoverview Unit tests for list-tabs utils.
  */
-import { test } from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, it, expect } from 'vitest';
 import { compare, safeHost, compileOptionalRegex } from './utils.js';
 
-void test('[list-tabs] compare.stringCI case-insensitive equality and ordering', () => {
-  assert.equal(compare.stringCI('Apple', 'apple'), 0);
-  assert.ok(compare.stringCI('a', 'b') < 0);
-});
+describe('list-tabs utils', () => {
+  it('compare.stringCI case-insensitive equality and ordering', () => {
+    expect(compare.stringCI('Apple', 'apple')).toBe(0);
+    expect(compare.stringCI('a', 'b')).toBeLessThan(0);
+  });
 
-void test('[list-tabs] compare.number numeric ordering', () => {
-  assert.equal(compare.number(1, 1), 0);
-  assert.ok(compare.number(1, 2) < 0);
-  assert.ok(compare.number(3, 2) > 0);
-});
+  it('compare.number numeric ordering', () => {
+    expect(compare.number(1, 1)).toBe(0);
+    expect(compare.number(1, 2)).toBeLessThan(0);
+    expect(compare.number(3, 2)).toBeGreaterThan(0);
+  });
 
-void test('[list-tabs] compare.boolean false before true', () => {
-  assert.equal(compare.boolean(false, false), 0);
-  assert.ok(compare.boolean(false, true) < 0);
-  assert.ok(compare.boolean(true, false) > 0);
-});
+  it('compare.boolean false before true', () => {
+    expect(compare.boolean(false, false)).toBe(0);
+    expect(compare.boolean(false, true)).toBeLessThan(0);
+    expect(compare.boolean(true, false)).toBeGreaterThan(0);
+  });
 
-void test('[list-tabs] safeHost extracts host from valid URL', () => {
-  assert.equal(safeHost('https://Example.COM/path'), 'example.com');
-});
+  it('safeHost extracts host from valid URL', () => {
+    expect(safeHost('https://Example.COM/path')).toBe('example.com');
+  });
 
-void test('[list-tabs] safeHost returns semantic placeholders for invalid / special URLs', () => {
-  assert.equal(safeHost('not a url'), '(invalid)');
-  assert.equal(safeHost(''), '(invalid)');
-  assert.equal(safeHost('   '), '(invalid)');
-  assert.equal(safeHost('file:///Users/test/readme.txt'), '(file)');
-  assert.equal(safeHost('about:blank'), '(about)');
-  assert.equal(safeHost('chrome://extensions/'), '(internal)');
-});
+  it('safeHost returns semantic placeholders for invalid / special URLs', () => {
+    expect(safeHost('not a url')).toBe('(invalid)');
+    expect(safeHost('')).toBe('(invalid)');
+    expect(safeHost('   ')).toBe('(invalid)');
+    expect(safeHost('file:///Users/test/readme.txt')).toBe('(file)');
+    expect(safeHost('about:blank')).toBe('(about)');
+    expect(safeHost('chrome://extensions/')).toBe('(internal)');
+  });
 
-void test('[list-tabs] compileOptionalRegex returns undefined for empty or invalid input', () => {
-  assert.equal(compileOptionalRegex(undefined), undefined);
-  assert.equal(compileOptionalRegex(''), undefined);
-  assert.equal(compileOptionalRegex('('), undefined);
-});
+  it('compileOptionalRegex returns undefined for empty or invalid input', () => {
+    expect(compileOptionalRegex(undefined)).toBeUndefined();
+    expect(compileOptionalRegex('')).toBeUndefined();
+    expect(compileOptionalRegex('(')).toBeUndefined();
+  });
 
-void test('[list-tabs] compileOptionalRegex compiles valid pattern (case-insensitive)', () => {
-  const r = compileOptionalRegex('abc');
-  assert.ok(r instanceof RegExp);
-  if (r instanceof RegExp) {
-    assert.ok(r.test('ABC'));
-  }
+  it('compileOptionalRegex compiles valid pattern (case-insensitive)', () => {
+    const r = compileOptionalRegex('abc');
+    expect(r instanceof RegExp).toBe(true);
+    if (r instanceof RegExp) {
+      expect(r.test('ABC')).toBe(true);
+    }
+  });
 });
